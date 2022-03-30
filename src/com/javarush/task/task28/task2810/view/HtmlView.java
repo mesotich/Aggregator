@@ -6,10 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +29,7 @@ public class HtmlView implements View {
             doc = getDocument();
         } catch (IOException e) {
             e.printStackTrace();
+            return "Some exception occurred";
         }
         Element temp = getTemplate(doc);
         doc = clearVacancies(doc);
@@ -67,7 +65,6 @@ public class HtmlView implements View {
             element.select(cssQuery).first().text(text);
         else element.select("a").first().attr("href", href).text(text);
         return element;
-        //<td class="title"><a href="url"></a></td>
     }
 
     protected Document getDocument() throws IOException {
@@ -76,14 +73,17 @@ public class HtmlView implements View {
 
     private Element getTemplate(Document document) {
         if (document == null)
-            throw new IllegalArgumentException();
-        Document doc = document.clone();
-        return (Element) doc.getElementsByClass("template").first().removeClass("template").removeAttr("style");
+            return null;
+        Element element = document.getElementsByClass("template").first();
+        Element elementClone = element.clone();
+        elementClone.removeClass("template");
+        elementClone.removeAttr("style");
+        return elementClone;
     }
 
     private Document clearVacancies(Document document) {
         if (document == null)
-            throw new IllegalArgumentException();
+           return null;
         for (Element element : document.select("tr.vacancy").not("tr.template")
         ) {
             element.remove();
@@ -98,6 +98,7 @@ public class HtmlView implements View {
             bw.write(html);
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Some exception occurred");
         }
     }
 
