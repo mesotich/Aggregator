@@ -26,26 +26,35 @@ public class HabrCareerStrategy implements Strategy {
         Vacancy vacancy;
         Document doc = null;
         Elements elements = null;
-        String title, salary = "", city, companyName, siteName = "", url;
-        try {
-            doc = getDocument(searchString, 0);
-        } catch (IOException e) {
-            e.printStackTrace();
+        String title, salary = "", city, companyName, siteName = "https://career.habr.com", url;
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            try {
+                doc = getDocument(searchString, i);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (doc != null)
+                elements = doc.select("div.vacancy-card__inner");
+            if (elements == null || elements.size() == 0)
+                return vacancies;
+            for (Element element : elements
+            ) {
+                vacancy = new Vacancy();
+                title = element.select("div.vacancy-card__title").first().select("a").text();
+                salary = getText(element, "div.basic-salary", false);
+                city = element.select("span.preserve-line").first().select("a.link-comp").text();
+                companyName = element.select("div.vacancy-card__company-title").first().select("a").first().text();
+                url = siteName + element.select("div.vacancy-card__title").select("a").attr("href");
+                vacancy.setTitle(title);
+                vacancy.setSalary(salary);
+                vacancy.setCity(city);
+                vacancy.setSiteName(siteName);
+                vacancy.setCompanyName(companyName);
+                vacancy.setUrl(url);
+                vacancies.add(vacancy);
+            }
         }
-        if (doc != null)
-            elements = doc.select("div.vacancy-card__inner");
-        if (elements == null || elements.size() == 0)
-            return vacancies;
-        for (Element element : elements
-        ) {
-            vacancy = new Vacancy();
-            title = getText(element, "div.vacancy-card__company-title", false);
-            salary = getText(element, "div.basic-salary", false);
-            //city = getText(element, "div.inline-list.a", false);
-
-            System.out.println(salary);
-        }
-        return null;
+        return vacancies;
     }
 
     private String getText(Element element, String cssQuery, boolean isHref) {
