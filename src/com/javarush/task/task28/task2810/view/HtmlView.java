@@ -22,23 +22,26 @@ public class HtmlView implements View {
 
     @Override
     public void update(List<Vacancy> vacancies) {
-        //updateFile(getUpdatedFileContent(vacancies));
-        getUpdatedFileContent(vacancies);
+        updateFile(getUpdatedFileContent(vacancies));
     }
 
     private String getUpdatedFileContent(List<Vacancy> vacancies) {
         Document doc = null;
-        Element temp = null;
+        Element element = null;
         try {
             doc = getDocument();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        temp = getTemplate(doc);
+        Element temp = getTemplate(doc);
         doc = clearVacancies(doc);
-        Element tempClone = temp.clone();
-        System.out.println(createHtmlVacancy(vacancies.get(2), tempClone));
-        return "";
+        for (Vacancy v : vacancies
+        ) {
+            Element tempClone = temp.clone();
+            element = createHtmlVacancy(v, tempClone);
+            doc.select("tr.template").first().before(element);
+        }
+        return doc.outerHtml();
     }
 
     private Element createHtmlVacancy(Vacancy vacancy, Element template) {
@@ -75,7 +78,7 @@ public class HtmlView implements View {
         if (document == null)
             throw new IllegalArgumentException();
         Document doc = document.clone();
-        return (Element) doc.getElementsByClass("template").first().removeAttr("style").removeAttr("class");
+        return (Element) doc.getElementsByClass("template").first().removeClass("template").removeAttr("style");
     }
 
     private Document clearVacancies(Document document) {

@@ -34,7 +34,7 @@ public class HHStrategy implements Strategy {
                 e.printStackTrace();
             }
             if (doc != null)
-                elements = doc.getElementsByAttributeValue("data-qa", "vacancy-serp__vacancy vacancy-serp__vacancy_standard_plus");
+                elements = doc.getElementsByAttributeValue("data-qa", "vacancy-serp__vacancy vacancy-serp__vacancy_standard");
             if (elements == null || elements.size() == 0)
                 return vacancies;
             for (Element el : elements
