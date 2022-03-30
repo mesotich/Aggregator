@@ -2,23 +2,105 @@ package com.javarush.task.task28.task2810.view;
 
 import com.javarush.task.task28.task2810.Controller;
 import com.javarush.task.task28.task2810.vo.Vacancy;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HtmlView implements View {
 
+    //private final String filePath = "./4.JavaCollections/src/" + this.getClass().getPackage().getName().replace('.', '/') + "/vacancies.html";
+    private final String filePath = "src/" + this.getClass().getPackage().getName().replace('.', '/') + "/vacancies.html";
     private Controller controller;
 
     @Override
     public void update(List<Vacancy> vacancies) {
-        System.out.println(vacancies.size());
+        //updateFile(getUpdatedFileContent(vacancies));
+        getUpdatedFileContent(vacancies);
+    }
+
+    private String getUpdatedFileContent(List<Vacancy> vacancies) {
+        Document doc = null;
+        Element temp = null;
+        try {
+            doc = getDocument();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        temp = getTemplate(doc);
+        doc = clearVacancies(doc);
+        Element newVacancy = temp.clone();
+        System.out.println(createHtmlVacancy(vacancies.get(2),newVacancy));
+        return "";
+    }
+
+    private Element createHtmlVacancy(Vacancy vacancy, Element template) {
+        Element result = template;
+        for (Map.Entry<String, String> entry : cssQueries(vacancy).entrySet()
+        ) {
+            result = createHtmlCell(result, entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
+    private Map<String, String> cssQueries(Vacancy vacancy) {
+        Map<String, String> result = new HashMap<>();
+        result.put("td.title", vacancy.getTitle());
+        result.put("td.city", vacancy.getCity());
+        result.put("td.companyName", vacancy.getCompanyName());
+        result.put("td.salary", vacancy.getSalary());
+        return result;
+    }
+
+    private Element createHtmlCell(Element element, String cssQuery, String text) {
+        element.select(cssQuery).first().text(text);
+        return element;
+    }
+
+    protected Document getDocument() throws IOException {
+        return Jsoup.parse(new File(filePath), "UTF-8");
+    }
+
+    private Element getTemplate(Document document) {
+        if (document == null)
+            throw new IllegalArgumentException();
+        Document doc = document.clone();
+        return (Element) doc.getElementsByClass("template").first().removeAttr("style").removeAttr("class");
+    }
+
+    private Document clearVacancies(Document document) {
+        if (document == null)
+            throw new IllegalArgumentException();
+        for (Element element : document.select("tr.vacancy").not("tr.template")
+        ) {
+            element.remove();
+        }
+        return document;
+    }
+
+    private void updateFile(String html) {
+        try (FileWriter fileWriter = new FileWriter(filePath);
+             BufferedWriter bw = new BufferedWriter(fileWriter)
+        ) {
+            bw.write(html);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void setController(Controller controller) {
         this.controller = controller;
     }
-    public void userCitySelectEmulationMethod(){
-        controller.onCitySelect("Odessa");
+
+    public void userCitySelectEmulationMethod() {
+        controller.onCitySelect("Novgorod");
     }
 }

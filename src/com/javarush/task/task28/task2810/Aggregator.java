@@ -15,5 +15,7 @@ public class Aggregator {
         Controller controller = new Controller(model);
         view.setController(controller);
         view.userCitySelectEmulationMethod();
+
+
     }
 }
