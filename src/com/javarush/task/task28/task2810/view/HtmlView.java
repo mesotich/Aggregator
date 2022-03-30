@@ -36,8 +36,8 @@ public class HtmlView implements View {
         }
         temp = getTemplate(doc);
         doc = clearVacancies(doc);
-        Element newVacancy = temp.clone();
-        System.out.println(createHtmlVacancy(vacancies.get(2),newVacancy));
+        Element tempClone = temp.clone();
+        System.out.println(createHtmlVacancy(vacancies.get(2), tempClone));
         return "";
     }
 
@@ -45,23 +45,26 @@ public class HtmlView implements View {
         Element result = template;
         for (Map.Entry<String, String> entry : cssQueries(vacancy).entrySet()
         ) {
-            result = createHtmlCell(result, entry.getKey(), entry.getValue());
+            result = createHtmlCell(result, entry.getKey(), entry.getValue(), "");
         }
+        result = createHtmlCell(result, "td.title", vacancy.getTitle(), vacancy.getUrl());
         return result;
     }
 
     private Map<String, String> cssQueries(Vacancy vacancy) {
         Map<String, String> result = new HashMap<>();
-        result.put("td.title", vacancy.getTitle());
         result.put("td.city", vacancy.getCity());
         result.put("td.companyName", vacancy.getCompanyName());
         result.put("td.salary", vacancy.getSalary());
         return result;
     }
 
-    private Element createHtmlCell(Element element, String cssQuery, String text) {
-        element.select(cssQuery).first().text(text);
+    private Element createHtmlCell(Element element, String cssQuery, String text, String href) {
+        if (!"td.title".equals(cssQuery))
+            element.select(cssQuery).first().text(text);
+        else element.select("a").first().attr("href", href).text(text);
         return element;
+        //<td class="title"><a href="url"></a></td>
     }
 
     protected Document getDocument() throws IOException {
